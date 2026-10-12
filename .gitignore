@@ -1,0 +1,15 @@
+*.iml
+.gradle/
+/local.properties
+/.idea/
+.DS_Store
+/build/
+/app/build/
+/captures/
+.externalNativeBuild/
+.cxx/
+# 签名材料绝不能提交
+keystore.properties
+*.jks
+*.keystore
+!app/debug.keystore
