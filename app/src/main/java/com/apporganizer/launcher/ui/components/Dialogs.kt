@@ -37,10 +37,10 @@ fun MoveToFolderDialog(
     var newName by remember { mutableStateOf("") }
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("移动「${app.label}」") },
+        title = { Text("Move “${app.label}”") },
         text = {
             Column(Modifier.heightIn(max = 420.dp).verticalScroll(rememberScrollState())) {
-                RadioRow("跟随自动分类", selected = !app.userAssigned) { onPick(null) }
+                RadioRow("Automatic (recommended)", selected = !app.userAssigned) { onPick(null) }
                 targets.forEach { f ->
                     RadioRow(f.name, selected = app.userAssigned && app.entity.userFolderId == f.id) { onPick(f.id) }
                 }
@@ -48,21 +48,21 @@ fun MoveToFolderDialog(
                 OutlinedTextField(
                     value = newName,
                     onValueChange = { newName = it.take(20) },
-                    label = { Text("新建文件夹") },
+                    label = { Text("New folder") },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                 )
                 Text(
-                    "手动分类后，自动分类不会再覆盖这个应用。",
+                    "Once you choose a folder, automatic sorting won’t move this app again.",
                     style = MaterialTheme.typography.bodySmall,
                     modifier = Modifier.padding(top = 4.dp),
                 )
             }
         },
         confirmButton = {
-            TextButton(enabled = newName.isNotBlank(), onClick = { onCreateAndMove(newName) }) { Text("新建并移动") }
+            TextButton(enabled = newName.isNotBlank(), onClick = { onCreateAndMove(newName) }) { Text("Create & move") }
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("取消") } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } },
     )
 }
 
@@ -79,35 +79,35 @@ fun FolderEditDialog(
     if (confirmDelete) {
         AlertDialog(
             onDismissRequest = { confirmDelete = false },
-            title = { Text("删除「$initialName」？") },
-            text = { Text("文件夹中的应用会回到自动分类，应用本身不会被卸载。") },
-            confirmButton = { TextButton(onClick = onDelete) { Text("删除") } },
-            dismissButton = { TextButton(onClick = { confirmDelete = false }) { Text("取消") } },
+            title = { Text("Delete “$initialName”?") },
+            text = { Text("Apps in this folder go back to automatic sorting. Nothing is uninstalled.") },
+            confirmButton = { TextButton(onClick = onDelete) { Text("Delete") } },
+            dismissButton = { TextButton(onClick = { confirmDelete = false }) { Text("Cancel") } },
         )
         return
     }
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("编辑文件夹") },
+        title = { Text("Edit folder") },
         text = {
             Column {
                 OutlinedTextField(
                     value = name,
                     onValueChange = { name = it.take(20) },
-                    label = { Text("名称") },
+                    label = { Text("Name") },
                     singleLine = true,
                 )
                 if (deletable) {
                     TextButton(onClick = { confirmDelete = true }, modifier = Modifier.padding(top = 8.dp)) {
-                        Text("删除文件夹", color = MaterialTheme.colorScheme.error)
+                        Text("Delete folder", color = MaterialTheme.colorScheme.error)
                     }
                 } else {
-                    Text("“其他”是兜底文件夹，不能删除。", style = MaterialTheme.typography.bodySmall)
+                    Text("“Other” catches unsorted apps and can’t be deleted.", style = MaterialTheme.typography.bodySmall)
                 }
             }
         },
-        confirmButton = { TextButton(enabled = name.isNotBlank(), onClick = { onRename(name) }) { Text("保存") } },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("取消") } },
+        confirmButton = { TextButton(enabled = name.isNotBlank(), onClick = { onRename(name) }) { Text("Save") } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } },
     )
 }
 

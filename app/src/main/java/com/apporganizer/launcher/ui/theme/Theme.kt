@@ -13,17 +13,29 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import com.apporganizer.launcher.data.system.IconLoader
 
 val LocalIconLoader = staticCompositionLocalOf<IconLoader> { error("IconLoader not provided") }
 
-/** 壁纸上的文字：白色 + 阴影，保证在浅色壁纸上也可读。 */
-val OnWallpaperLabel = TextStyle(
-    color = Color.White,
-    fontSize = 12.sp,
-    shadow = Shadow(color = Color(0x99000000), blurRadius = 6f),
+/** Frosted dark glass used for panels on top of the wallpaper. Works on light and dark wallpapers. */
+val Glass = Color(0x47000000)
+val GlassStrong = Color(0x66000000)
+
+private val WallpaperShadow = Shadow(color = Color(0x80000000), blurRadius = 8f)
+
+/** Text drawn directly on the wallpaper: white with a soft shadow. */
+val OnWallpaperLabel = TextStyle(color = Color.White, fontSize = 12.sp, shadow = WallpaperShadow)
+val OnWallpaperTitle = TextStyle(
+    color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.SemiBold,
+    letterSpacing = 0.2.sp, shadow = WallpaperShadow,
 )
+val ClockStyle = TextStyle(
+    color = Color.White, fontSize = 64.sp, fontWeight = FontWeight.Light,
+    letterSpacing = (-1).sp, shadow = WallpaperShadow,
+)
+val DateStyle = TextStyle(color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Medium, shadow = WallpaperShadow)
 
 @Composable
 fun AppTheme(content: @Composable () -> Unit) {

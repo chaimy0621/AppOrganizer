@@ -7,7 +7,7 @@ import androidx.room.RoomDatabase
 
 @Database(
     entities = [AppEntity::class, FolderEntity::class, LaunchEventEntity::class, ScoreEntity::class],
-    version = 1,
+    version = 2, // v2: English folder names
     exportSchema = true,
 )
 abstract class AppDatabase : RoomDatabase() {

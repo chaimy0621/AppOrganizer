@@ -65,9 +65,9 @@ fun SettingsScreen(vm: HomeViewModel, onBack: () -> Unit) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("设置") },
+                title = { Text("Settings") },
                 navigationIcon = {
-                    IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "返回") }
+                    IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back") }
                 },
             )
         },
@@ -80,74 +80,74 @@ fun SettingsScreen(vm: HomeViewModel, onBack: () -> Unit) {
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            SettingCard("使用数据来源") {
+            SettingCard("Usage data") {
                 if (state.usageMode == UsageMode.SYSTEM) {
-                    Text("已授权“使用情况访问”。仅读取应用的启动次数和最后使用时间。")
+                    Text("Usage Access is on. Only app launch counts and last-used times are read.")
                 } else {
-                    Text("内部学习模式：未授权“使用情况访问”，只根据你在本桌面内点击应用的次数学习。从其他入口（通知、分享等）打开的应用不会被统计。")
+                    Text("Learning from your taps: Usage Access is off, so only apps you open from this launcher are counted. Apps opened from notifications or links aren’t counted.")
                     Spacer(Modifier.height(8.dp))
-                    Button(onClick = { SystemIntents.openUsageAccess(context) }) { Text("授予使用情况访问权限") }
+                    Button(onClick = { SystemIntents.openUsageAccess(context) }) { Text("Allow Usage Access") }
                 }
                 Text(
-                    "不会读取聊天、密码、文件、通知或屏幕内容。所有数据只保存在本机，本应用没有网络权限。",
+                    "Never reads messages, passwords, files, notifications or screen content. Everything stays on this phone — the app has no internet permission.",
                     style = MaterialTheme.typography.bodySmall,
                     modifier = Modifier.padding(top = 8.dp),
                 )
             }
 
-            SettingCard("自动整理") {
+            SettingCard("Auto-sorting") {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Column(Modifier.weight(1f)) {
-                        Text("每天自动调整常用应用")
-                        Text("关闭后常用区保持当前顺序，不再变化。", style = MaterialTheme.typography.bodySmall)
+                        Text("Update frequent apps daily")
+                        Text("When off, Frequently used keeps its current order.", style = MaterialTheme.typography.bodySmall)
                     }
                     Switch(checked = state.settings.autoAdjust, onCheckedChange = vm::setAutoAdjust)
                 }
                 Spacer(Modifier.height(8.dp))
-                OutlinedButton(onClick = vm::recomputeNow) { Text("立即重新整理常用应用") }
+                OutlinedButton(onClick = vm::recomputeNow) { Text("Refresh frequent apps now") }
             }
 
-            SettingCard("布局模式") {
+            SettingCard("Layout") {
                 LayoutMode.entries.forEach { m ->
                     RadioRow("${m.displayName} — ${m.description}", selected = state.settings.layoutMode == m) { vm.setLayout(m) }
                 }
             }
 
-            SettingCard("文件夹") {
+            SettingCard("Folders") {
                 state.moveTargets.forEach { f ->
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(f.name, Modifier.weight(1f))
-                        IconButton(onClick = { editing = f }) { Icon(Icons.Filled.Edit, "编辑 ${f.name}") }
+                        IconButton(onClick = { editing = f }) { Icon(Icons.Filled.Edit, "Edit ${f.name}") }
                     }
                 }
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     OutlinedTextField(
                         value = newFolder, onValueChange = { newFolder = it.take(20) },
-                        label = { Text("新建文件夹") }, singleLine = true, modifier = Modifier.weight(1f),
+                        label = { Text("New folder") }, singleLine = true, modifier = Modifier.weight(1f),
                     )
-                    TextButton(enabled = newFolder.isNotBlank(), onClick = { vm.createFolder(newFolder); newFolder = "" }) { Text("创建") }
+                    TextButton(enabled = newFolder.isNotBlank(), onClick = { vm.createFolder(newFolder); newFolder = "" }) { Text("Create") }
                 }
-                Text("空文件夹不会显示在首页；长按应用 →「移动到文件夹」即可放入。", style = MaterialTheme.typography.bodySmall)
+                Text("Empty folders are hidden on the home screen. Long-press an app → Move to folder.", style = MaterialTheme.typography.bodySmall)
                 Spacer(Modifier.height(8.dp))
-                OutlinedButton(onClick = vm::rescan) { Text("重新扫描应用") }
-                OutlinedButton(onClick = { confirmReset = true }) { Text("恢复默认分类") }
+                OutlinedButton(onClick = vm::rescan) { Text("Rescan apps") }
+                OutlinedButton(onClick = { confirmReset = true }) { Text("Restore default categories") }
             }
 
-            SettingCard("默认桌面") {
-                Text(if (roleHeld) "当前默认桌面：智能桌面" else "当前默认桌面：其他（如 One UI Home）")
+            SettingCard("Default home screen") {
+                Text(if (roleHeld) "Smart Launcher is your home screen." else "Another launcher (e.g. One UI Home) is your home screen.")
                 Spacer(Modifier.height(8.dp))
                 if (!roleHeld) {
                     Button(onClick = {
                         SystemIntents.homeRoleRequest(context)?.let { roleLauncher.launch(it) }
                             ?: SystemIntents.openHomeSettings(context)
-                    }) { Text("设为默认桌面") }
+                    }) { Text("Set as home screen") }
                 }
-                OutlinedButton(onClick = { SystemIntents.openHomeSettings(context) }) { Text("切换回 One UI Home") }
+                OutlinedButton(onClick = { SystemIntents.openHomeSettings(context) }) { Text("Switch back to One UI Home") }
                 Text(SystemIntents.RESTORE_ONE_UI_STEPS, style = MaterialTheme.typography.bodySmall)
             }
 
-            SettingCard("其他") {
-                OutlinedButton(onClick = { vm.restartOnboarding(); onBack() }) { Text("重新运行安装向导") }
+            SettingCard("More") {
+                OutlinedButton(onClick = { vm.restartOnboarding(); onBack() }) { Text("Run setup again") }
             }
         }
     }
@@ -155,10 +155,10 @@ fun SettingsScreen(vm: HomeViewModel, onBack: () -> Unit) {
     if (confirmReset) {
         AlertDialog(
             onDismissRequest = { confirmReset = false },
-            title = { Text("恢复默认分类？") },
-            text = { Text("将清除所有手动分类和自建文件夹，并重新自动分类。锁定位置、Dock 和使用记录不受影响。") },
-            confirmButton = { TextButton(onClick = { vm.resetClassification(); confirmReset = false }) { Text("恢复") } },
-            dismissButton = { TextButton(onClick = { confirmReset = false }) { Text("取消") } },
+            title = { Text("Restore default categories?") },
+            text = { Text("Removes your manual folder choices and custom folders, then re-sorts all apps. Pins, Dock and usage history are kept.") },
+            confirmButton = { TextButton(onClick = { vm.resetClassification(); confirmReset = false }) { Text("Restore") } },
+            dismissButton = { TextButton(onClick = { confirmReset = false }) { Text("Cancel") } },
         )
     }
 

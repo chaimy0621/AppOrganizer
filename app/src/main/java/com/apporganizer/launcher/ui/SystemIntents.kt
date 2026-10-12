@@ -38,6 +38,6 @@ object SystemIntents {
     }
 
     const val RESTORE_ONE_UI_STEPS =
-        "设置 → 应用 → 选择默认应用 → 主屏幕应用 → 选择「One UI 主屏幕」。\n" +
-            "也可以直接在本应用设置中点「切换回 One UI Home」。卸载本应用后系统也会自动恢复 One UI Home。"
+        "Settings → Apps → Choose default apps → Home app → One UI Home.\n" +
+            "Or tap “Switch back to One UI Home” in this app’s settings. Uninstalling this app also restores One UI Home."
 }

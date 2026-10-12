@@ -118,7 +118,7 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
 
         val folderUis = buildList {
             grouped[RECENT_FOLDER_ID]?.let { list ->
-                add(FolderUi(RECENT_FOLDER_ID, "最近安装", null, true, list.sortedByDescending { it.installedAt }.map(::uiOf)))
+                add(FolderUi(RECENT_FOLDER_ID, "New", null, true, list.sortedByDescending { it.installedAt }.map(::uiOf)))
             }
             live.forEach { f ->
                 val list = grouped[f.id].orEmpty()
@@ -174,7 +174,7 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
     // ---------- 应用操作 ----------
 
     fun launch(app: AppUi) {
-        if (!repo.launch(app.entity)) _message.value = "无法打开 ${app.label}"
+        if (!repo.launch(app.entity)) _message.value = "Can't open ${app.label}"
     }
 
     fun lockAt(app: AppUi, slot: Int) = io { repo.lockAt(app.key, slot) }
@@ -185,7 +185,7 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
         val s = state.value
         val lockedSlots = s.allApps.mapNotNull { it.entity.lockedSlot }.toSet()
         val slot = (0 until s.settings.layoutMode.frequentCount).firstOrNull { it !in lockedSlots }
-        if (slot == null) _message.value = "常用区位置都已锁定" else repo.lockAt(app.key, slot)
+        if (slot == null) _message.value = "All frequent slots are locked" else repo.lockAt(app.key, slot)
     }
 
     fun setExcluded(app: AppUi, excluded: Boolean) = io { repo.setExcluded(app.key, excluded) }
@@ -194,7 +194,7 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
         if (name.isBlank()) return@io
         repo.moveToFolder(app.key, repo.createFolder(name))
     }
-    fun addToDock(app: AppUi) = io { if (!repo.addToDock(app.key)) _message.value = "Dock 已满（最多 5 个）" }
+    fun addToDock(app: AppUi) = io { if (!repo.addToDock(app.key)) _message.value = "Dock is full (max 5 apps)" }
     fun removeFromDock(app: AppUi) = io { repo.removeFromDock(app.key) }
 
     // ---------- 文件夹 ----------
@@ -207,9 +207,9 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
 
     fun setLayout(mode: LayoutMode) = io { repo.settings.setLayoutMode(mode) }
     fun setAutoAdjust(v: Boolean) = io { repo.settings.setAutoAdjust(v) }
-    fun recomputeNow() = io { repo.ingestUsage(); repo.recomputeScores(); _message.value = "常用应用已重新整理" }
-    fun rescan() = io { repo.rescan(); _message.value = "已重新扫描应用" }
-    fun resetClassification() = io { repo.resetClassification(); _message.value = "已恢复默认分类" }
+    fun recomputeNow() = io { repo.ingestUsage(); repo.recomputeScores(); _message.value = "Frequent apps refreshed" }
+    fun rescan() = io { repo.rescan(); _message.value = "Apps rescanned" }
+    fun resetClassification() = io { repo.resetClassification(); _message.value = "Default categories restored" }
 
     fun scanForOnboarding() = io { repo.syncInstalledApps() }
 

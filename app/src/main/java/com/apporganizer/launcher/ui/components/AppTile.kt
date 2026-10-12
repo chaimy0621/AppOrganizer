@@ -8,13 +8,14 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.PushPin
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -43,11 +44,11 @@ fun AppIcon(app: AppUi, size: Dp, modifier: Modifier = Modifier) {
     if (bmp != null) {
         Image(bitmap = bmp, contentDescription = app.label, modifier = modifier.size(size))
     } else {
-        Box(modifier.size(size).clip(RoundedCornerShape(size / 4)).background(Color(0x33FFFFFF)))
+        Box(modifier.size(size).clip(RoundedCornerShape(size * 0.3f)).background(Color(0x33FFFFFF)))
     }
 }
 
-/** 应用图标 + 名称。点击启动，长按弹出菜单（菜单内容由调用方提供）。 */
+/** App icon with label. Tap to open, long-press for the action menu (supplied by caller). */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun AppTile(
@@ -56,7 +57,7 @@ fun AppTile(
     onClick: () -> Unit,
     onLongClick: () -> Unit,
     modifier: Modifier = Modifier,
-    iconSize: Dp = 52.dp,
+    iconSize: Dp = 54.dp,
     showLabel: Boolean = true,
     menu: @Composable () -> Unit = {},
 ) {
@@ -64,34 +65,35 @@ fun AppTile(
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
-                .clip(RoundedCornerShape(12.dp))
-                .combinedClickable(onClick = onClick, onLongClick = onLongClick, onLongClickLabel = "更多操作")
+                .clip(RoundedCornerShape(16.dp))
+                .combinedClickable(onClick = onClick, onLongClick = onLongClick, onLongClickLabel = "More options")
                 .padding(vertical = 6.dp, horizontal = 2.dp),
         ) {
             Box {
                 AppIcon(app, iconSize)
                 if (app.locked) {
                     Icon(
-                        Icons.Filled.Lock, contentDescription = "已锁定",
+                        Icons.Filled.PushPin, contentDescription = "Pinned",
                         tint = Color.White,
                         modifier = Modifier
-                            .align(Alignment.BottomEnd)
-                            .size(16.dp)
+                            .align(Alignment.TopEnd)
+                            .offset(x = 4.dp, y = (-4).dp)
+                            .size(18.dp)
                             .clip(CircleShape)
-                            .background(Color(0xCC1F3A5F))
-                            .padding(2.dp),
+                            .background(Color(0xFF3D7BFF))
+                            .padding(3.dp),
                     )
                 }
             }
             if (showLabel) {
-                Spacer(Modifier.height(4.dp))
+                Spacer(Modifier.height(6.dp))
                 Text(
                     app.label,
                     style = labelStyle,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     textAlign = TextAlign.Center,
-                    modifier = Modifier.width(iconSize + 20.dp),
+                    modifier = Modifier.width(iconSize + 18.dp),
                 )
             }
         }
@@ -99,15 +101,8 @@ fun AppTile(
     }
 }
 
-/** 空的常用区位置（保持网格稳定，图标不会因为数量变化而错位）。 */
+/** Invisible placeholder that keeps the grid stable when a frequent slot is empty. */
 @Composable
-fun EmptySlot(modifier: Modifier = Modifier, iconSize: Dp = 52.dp) {
-    Box(modifier.padding(vertical = 6.dp), contentAlignment = Alignment.TopCenter) {
-        Box(
-            Modifier
-                .size(iconSize)
-                .clip(RoundedCornerShape(iconSize / 4))
-                .background(Color(0x14FFFFFF))
-        )
-    }
+fun EmptySlot(modifier: Modifier = Modifier, iconSize: Dp = 54.dp) {
+    Spacer(modifier.padding(vertical = 6.dp).size(iconSize))
 }

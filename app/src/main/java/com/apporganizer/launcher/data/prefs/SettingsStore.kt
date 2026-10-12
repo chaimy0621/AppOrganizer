@@ -16,9 +16,9 @@ import kotlinx.coroutines.flow.map
 private val Context.dataStore by preferencesDataStore(name = "settings")
 
 enum class LayoutMode(val frequentCount: Int, val displayName: String, val description: String) {
-    BALANCED(8, "平衡模式", "8 个常用应用 + 智能文件夹"),
-    FOLDERS_FIRST(4, "文件夹优先", "4 个常用应用，文件夹占主要空间"),
-    FREQUENT_FIRST(12, "常用优先", "12 个常用应用，文件夹在下方");
+    BALANCED(8, "Balanced", "8 frequent apps + smart folders"),
+    FOLDERS_FIRST(4, "Folders first", "4 frequent apps, more room for folders"),
+    FREQUENT_FIRST(12, "Frequent first", "12 frequent apps, folders below");
 
     companion object {
         fun fromName(name: String?) = entries.firstOrNull { it.name == name } ?: BALANCED
@@ -41,7 +41,7 @@ class SettingsStore(context: Context) {
         val AUTO = booleanPreferencesKey("auto_adjust")
         val LAST_RANK = longPreferencesKey("last_ranking_at")
         val LAST_INGEST = longPreferencesKey("last_ingest_at")
-        val DOCK_INIT = booleanPreferencesKey("dock_initialized")
+        val DOCK_INIT = booleanPreferencesKey("dock_initialized_v2") // reset with DB v2
     }
 
     private val prefs: Flow<Preferences> = ds.data.catch { emit(emptyPreferences()) }
