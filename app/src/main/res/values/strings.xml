@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Smart Launcher</string>
+    <string name="widget_title">Recent apps</string>
+    <string name="widget_description">All your apps, most recently used at the top</string>
+    <string name="widget_loading">Loading your apps…</string>
+    <string name="search_apps">Search apps</string>
 </resources>

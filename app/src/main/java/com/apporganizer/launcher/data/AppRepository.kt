@@ -18,6 +18,7 @@ import com.apporganizer.launcher.data.system.UsageStatsSource
 import com.apporganizer.launcher.domain.Category
 import com.apporganizer.launcher.domain.Classifier
 import com.apporganizer.launcher.domain.RankingEngine
+import com.apporganizer.launcher.widget.RecentAppsWidget
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -27,7 +28,7 @@ import kotlinx.coroutines.withContext
 
 /** 唯一的数据入口：首页常用区、文件夹、Dock 都从这里读取同一份数据。 */
 class AppRepository(
-    context: Context,
+    private val context: Context,
     private val db: AppDatabase,
     val settings: SettingsStore,
     private val installed: InstalledAppsSource,
@@ -60,7 +61,10 @@ class AppRepository(
 
     private fun resync(packageName: String?) {
         packageName?.let { icons.invalidatePackage(it) }
-        scope.launch { syncInstalledApps() }
+        scope.launch {
+            syncInstalledApps()
+            RecentAppsWidget.refresh(context)
+        }
     }
 
     fun startWatchingPackages() {
@@ -149,7 +153,31 @@ class AppRepository(
             eventDao.insert(
                 LaunchEventEntity(packageName = packageName, at = System.currentTimeMillis(), source = LaunchEventEntity.SOURCE_LAUNCHER)
             )
+            RecentAppsWidget.refresh(context)
         }
+    }
+
+    /** Opens an app from the widget or search and remembers the tap. */
+    fun launchComponent(packageName: String, className: String, bounds: android.graphics.Rect? = null): Boolean {
+        val ok = installed.launch(packageName, className, bounds)
+        if (ok) recordLaunch(packageName)
+        return ok
+    }
+
+    /**
+     * All launchable apps, most recently used first.
+     * Uses the system's "last visible" time (needs Usage Access) plus taps made through this app;
+     * apps never used go to the end in A–Z order.
+     */
+    suspend fun recentApps(): List<AppEntity> = withContext(Dispatchers.IO) {
+        val now = System.currentTimeMillis()
+        val last = HashMap<String, Long>()
+        usage.lastUsedTimes(now - 365 * RankingEngine.DAY, now).forEach { (pkg, t) -> last.merge(pkg, t) { a, b -> maxOf(a, b) } }
+        eventDao.since(now - 35 * RankingEngine.DAY, LaunchEventEntity.SOURCE_LAUNCHER)
+            .forEach { last.merge(it.packageName, it.at) { a, b -> maxOf(a, b) } }
+        appDao.getAll().sortedWith(
+            compareByDescending<AppEntity> { last[it.packageName] ?: 0L }.thenBy { it.label.lowercase() }
+        )
     }
 
     fun launch(app: AppEntity): Boolean {

@@ -28,6 +28,14 @@ class UsageStatsSource(private val context: Context) {
         }
     }
 
+    /** Last time each app was on screen (package → epoch ms). Empty without Usage Access. */
+    fun lastUsedTimes(from: Long, to: Long): Map<String, Long> {
+        if (!hasAccess()) return emptyMap()
+        return usm.queryAndAggregateUsageStats(from, to)
+            .mapValues { it.value.lastTimeVisible }
+            .filterValues { it > 0L }
+    }
+
     /**
      * 返回 (packageName, 时间戳) 列表。一次“启动”= 前台应用从别的包切换到该包；
      * 同一应用内部切换 Activity 不重复计数；锁屏后重新回到同一应用算一次新启动。

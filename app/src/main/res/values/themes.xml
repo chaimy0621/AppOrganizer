@@ -1,11 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- 透明背景，显示系统壁纸 -->
-    <style name="Theme.AppOrganizer" parent="android:Theme.Material.Wallpaper.NoTitleBar">
-        <item name="android:windowShowWallpaper">true</item>
-        <item name="android:windowBackground">@android:color/transparent</item>
+    <style name="Theme.AppOrganizer" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/app_bg</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
-        <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
     </style>
 </resources>

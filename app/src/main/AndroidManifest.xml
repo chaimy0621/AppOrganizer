@@ -46,27 +46,42 @@
         android:theme="@style/Theme.AppOrganizer"
         tools:targetApi="35">
 
+        <!-- Setup screen (from the app list) and search screen (from the widget). -->
         <activity
             android:name=".ui.MainActivity"
             android:exported="true"
-            android:clearTaskOnLaunch="true"
             android:launchMode="singleTask"
-            android:resizeableActivity="true"
-            android:resumeWhilePausing="true"
-            android:stateNotNeeded="true"
-            android:taskAffinity=""
-            android:windowSoftInputMode="adjustPan">
-            <!-- 作为普通 App 出现在 One UI 抽屉中，方便首次运行向导 -->
+            android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-            <!-- 作为 Home App 候选 -->
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.HOME" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
         </activity>
+
+        <!-- Invisible hop that opens the app tapped in the widget. -->
+        <activity
+            android:name=".widget.LaunchActivity"
+            android:excludeFromRecents="true"
+            android:exported="false"
+            android:noHistory="true"
+            android:taskAffinity=""
+            android:theme="@android:style/Theme.NoDisplay" />
+
+        <receiver
+            android:name=".widget.RecentAppsWidget"
+            android:exported="true"
+            android:label="@string/widget_title">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/recent_apps_widget_info" />
+        </receiver>
+
+        <service
+            android:name=".widget.RecentAppsWidgetService"
+            android:exported="false"
+            android:permission="android.permission.BIND_REMOTEVIEWS" />
     </application>
 </manifest>

@@ -2,13 +2,13 @@ package com.apporganizer.launcher
 
 import android.app.Application
 import android.content.Context
+import androidx.work.WorkManager
 import com.apporganizer.launcher.data.AppRepository
 import com.apporganizer.launcher.data.db.AppDatabase
 import com.apporganizer.launcher.data.prefs.SettingsStore
 import com.apporganizer.launcher.data.system.IconLoader
 import com.apporganizer.launcher.data.system.InstalledAppsSource
 import com.apporganizer.launcher.data.system.UsageStatsSource
-import com.apporganizer.launcher.work.DailyWorkScheduler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -21,11 +21,12 @@ class App : Application() {
         super.onCreate()
         container = AppContainer(this)
         container.repository.startWatchingPackages()
-        DailyWorkScheduler.schedule(this)
+        // The old daily-sorting job from the launcher version is no longer needed.
+        WorkManager.getInstance(this).cancelUniqueWork("daily_ranking")
     }
 }
 
-/** 手动依赖注入（MVP 不引入 Hilt，减少构建复杂度）。 */
+/** Manual dependency wiring. */
 class AppContainer(context: Context) {
     val appScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     val iconLoader = IconLoader(context)
