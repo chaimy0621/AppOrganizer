@@ -64,5 +64,5 @@ private class Factory(private val context: Context) : RemoteViewsService.RemoteV
     override fun hasStableIds() = true
     override fun onDestroy() { icons.clear() }
 
-    private companion object { const val ICON_PX = 120 }
+    private companion object { const val ICON_PX = 168 }
 }

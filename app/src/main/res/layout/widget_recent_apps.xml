@@ -17,7 +17,7 @@
         android:orientation="horizontal"
         android:paddingStart="8dp"
         android:paddingEnd="2dp"
-        android:paddingBottom="12dp">
+        android:paddingBottom="18dp">
 
         <TextView
             android:id="@+id/title"
@@ -47,12 +47,12 @@
         android:clipToPadding="false"
         android:fadingEdgeLength="24dp"
         android:listSelector="@android:color/transparent"
-        android:numColumns="7"
+        android:numColumns="5"
         android:paddingBottom="14dp"
         android:requiresFadingEdge="vertical"
         android:scrollbars="none"
         android:stretchMode="columnWidth"
-        android:verticalSpacing="10dp" />
+        android:verticalSpacing="22dp" />
 
     <TextView
         android:id="@+id/empty"
