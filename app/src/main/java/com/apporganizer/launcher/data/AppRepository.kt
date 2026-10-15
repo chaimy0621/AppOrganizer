@@ -164,6 +164,22 @@ class AppRepository(
         return ok
     }
 
+    /** Apps in the widget's pinned row, left to right. */
+    suspend fun pinnedApps(): List<AppEntity> = withContext(Dispatchers.IO) {
+        appDao.getAll()
+            .filter { it.lockedSlot != null && it.lockedSlot in 0 until MAX_PINS }
+            .sortedBy { it.lockedSlot }
+    }
+
+    /** Replaces the pinned row with [keys] (left to right) and redraws the widget. */
+    suspend fun setPins(keys: List<String>) {
+        db.withTransaction {
+            appDao.clearAllLocks()
+            keys.take(MAX_PINS).forEachIndexed { i, key -> appDao.setLockedSlot(key, i) }
+        }
+        RecentAppsWidget.refresh(context)
+    }
+
     /**
      * All launchable apps, most recently used first.
      * Uses the system's "last visible" time (needs Usage Access) plus taps made through this app;
@@ -268,6 +284,7 @@ class AppRepository(
 
     companion object {
         const val MAX_DOCK = 5
+        const val MAX_PINS = 5
     }
 }
 

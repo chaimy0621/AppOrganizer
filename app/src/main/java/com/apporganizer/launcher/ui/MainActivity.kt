@@ -73,34 +73,35 @@ import com.apporganizer.launcher.data.db.AppEntity
 import com.apporganizer.launcher.ui.theme.LocalIconLoader
 import com.apporganizer.launcher.widget.RecentAppsWidget
 
-private val Bg = Color(0xFF121318)
-private val Card = Color(0xFF1C1E25)
-private val TextMain = Color(0xFFF2F2F4)
-private val TextDim = Color(0xFF9A9CA5)
-private val Accent = Color(0xFF4C7DFF)
+internal val Bg = Color(0xFF121318)
+internal val Card = Color(0xFF1C1E25)
+internal val TextMain = Color(0xFFF2F2F4)
+internal val TextDim = Color(0xFF9A9CA5)
+internal val Accent = Color(0xFF4C7DFF)
 
-/** Two screens: setup (from the app list) and search (from the widget's search button). */
+/** Three screens: setup (from the app list), search and edit-pinned (from the widget's buttons). */
 class MainActivity : ComponentActivity() {
     private val container by lazy { (application as App).container }
-    private var searchMode by mutableStateOf(false)
+    private var mode by mutableStateOf(Mode.SETUP)
     private var hasUsageAccess by mutableStateOf(false)
     private var widgetPlaced by mutableStateOf(false)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
-        searchMode = intent?.action == ACTION_SEARCH
+        mode = modeFor(intent)
         setContent {
             CompositionLocalProvider(LocalIconLoader provides container.iconLoader) {
                 Box(Modifier.fillMaxSize().background(Bg)) {
-                    if (searchMode) {
-                        SearchScreen(onLaunch = ::launch, onClose = ::finish)
-                    } else {
-                        SetupScreen(
+                    when (mode) {
+                        Mode.SEARCH -> SearchScreen(onLaunch = ::launch, onClose = ::finish)
+                        Mode.EDIT -> EditPinnedScreen(container.repository, onDone = ::finish)
+                        Mode.SETUP -> SetupScreen(
                             hasUsageAccess = hasUsageAccess,
                             widgetPlaced = widgetPlaced,
                             onAllowUsage = { SystemIntents.openUsageAccess(this@MainActivity) },
                             onAddWidget = ::requestWidget,
+                            onEditPinned = { mode = Mode.EDIT },
                         )
                     }
                 }
@@ -110,7 +111,13 @@ class MainActivity : ComponentActivity() {
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
-        searchMode = intent.action == ACTION_SEARCH
+        mode = modeFor(intent)
+    }
+
+    private fun modeFor(intent: Intent?) = when (intent?.action) {
+        ACTION_SEARCH -> Mode.SEARCH
+        ACTION_EDIT -> Mode.EDIT
+        else -> Mode.SETUP
     }
 
     override fun onResume() {
@@ -201,11 +208,14 @@ class MainActivity : ComponentActivity() {
 
     companion object {
         const val ACTION_SEARCH = "com.apporganizer.launcher.SEARCH"
+        const val ACTION_EDIT = "com.apporganizer.launcher.EDIT"
     }
+
+    private enum class Mode { SETUP, SEARCH, EDIT }
 }
 
 @Composable
-private fun AppIcon(app: AppEntity, size: Dp) {
+internal fun AppIcon(app: AppEntity, size: Dp) {
     val loader = LocalIconLoader.current
     val bmp: ImageBitmap? by produceState(loader.cached(app.appKey), app.appKey) {
         if (value == null) value = loader.load(app.packageName, app.className, app.appKey)
@@ -221,6 +231,7 @@ private fun SetupScreen(
     widgetPlaced: Boolean,
     onAllowUsage: () -> Unit,
     onAddWidget: () -> Unit,
+    onEditPinned: () -> Unit,
 ) {
     Column(
         Modifier
@@ -264,6 +275,15 @@ private fun SetupScreen(
             body = "Long-press the widget, then drag the blue edges until it fills the page.",
             button = null,
             onClick = {},
+        )
+
+        StepCard(
+            number = 4,
+            done = false,
+            title = "Pin your favourites",
+            body = "Tap the pencil on the widget, then long-press an app and drag it to the top row. Pinned apps always stay at the top.",
+            button = "Edit pinned",
+            onClick = onEditPinned,
         )
 
         Spacer(Modifier.height(8.dp))

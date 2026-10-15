@@ -5,4 +5,5 @@
     <string name="widget_description">All your apps, most recently used at the top</string>
     <string name="widget_loading">Loading your apps…</string>
     <string name="search_apps">Search apps</string>
+    <string name="edit_pinned">Edit pinned apps</string>
 </resources>

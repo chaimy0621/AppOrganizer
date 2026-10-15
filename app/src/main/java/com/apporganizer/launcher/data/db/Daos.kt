@@ -24,6 +24,9 @@ interface AppDao {
     @Query("UPDATE apps SET lockedSlot = NULL WHERE lockedSlot = :slot")
     suspend fun clearLockedSlot(slot: Int)
 
+    @Query("UPDATE apps SET lockedSlot = NULL")
+    suspend fun clearAllLocks()
+
     @Query("UPDATE apps SET lockedSlot = :slot WHERE appKey = :key")
     suspend fun setLockedSlot(key: String, slot: Int?)
 
