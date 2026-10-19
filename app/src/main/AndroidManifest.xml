@@ -2,12 +2,12 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- 唯一的敏感权限：使用情况访问（需用户在系统设置中手动开启，可拒绝）。 -->
+    <!-- The only sensitive permission: Usage Access (the user turns it on in system settings and may decline). -->
     <uses-permission
         android:name="android.permission.PACKAGE_USAGE_STATS"
         tools:ignore="ProtectedPermissions" />
 
-    <!-- 隐私承诺：强制从最终 APK 中移除网络权限，防止任何依赖库带入。 -->
+    <!-- Privacy promise: strip network permissions from the final APK so no dependency can add them. -->
     <uses-permission
         android:name="android.permission.INTERNET"
         tools:node="remove" />
@@ -15,7 +15,7 @@
         android:name="android.permission.ACCESS_NETWORK_STATE"
         tools:node="remove" />
 
-    <!-- Android 11+ 包可见性：只声明需要的查询，不申请 QUERY_ALL_PACKAGES。 -->
+    <!-- Android 11+ package visibility: declare only the queries needed; no QUERY_ALL_PACKAGES. -->
     <queries>
         <intent>
             <action android:name="android.intent.action.MAIN" />

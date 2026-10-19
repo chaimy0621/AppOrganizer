@@ -1,6 +1,6 @@
 package com.apporganizer.launcher.domain
 
-/** 智能文件夹类别。声明顺序 = 首页默认文件夹顺序。 */
+/** Smart-folder categories. Declaration order = default folder order. */
 enum class Category(val displayName: String) {
     WORK("Work"),
     COMMUNICATION("Social"),

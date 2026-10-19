@@ -1,3 +1,3 @@
-# Room / WorkManager / Compose 自带 consumer rules，MVP 无需额外规则。
-# 保留行号便于本地排查崩溃（不上传任何崩溃数据）。
+# Room / WorkManager / Compose ship their own consumer rules; no extra rules needed.
+# Keep line numbers for local crash debugging (no crash data is ever uploaded).
 -keepattributes SourceFile,LineNumberTable

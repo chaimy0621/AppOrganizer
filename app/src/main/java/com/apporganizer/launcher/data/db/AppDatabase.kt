@@ -19,7 +19,7 @@ abstract class AppDatabase : RoomDatabase() {
     companion object {
         fun build(context: Context): AppDatabase =
             Room.databaseBuilder(context, AppDatabase::class.java, "organizer.db")
-                // 后续版本请改为显式 Migration；MVP 阶段允许破坏性迁移。
+                // Switch to explicit Migrations in later versions; destructive migration is fine for the MVP.
                 .fallbackToDestructiveMigration()
                 .build()
     }

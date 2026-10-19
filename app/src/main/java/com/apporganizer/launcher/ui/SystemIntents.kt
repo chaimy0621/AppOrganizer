@@ -9,20 +9,20 @@ import android.provider.Settings
 
 object SystemIntents {
 
-    /** 打开“使用情况访问权限”设置页（优先直达本应用）。 */
+    /** Opens the Usage Access settings page (this app's entry directly when possible). */
     fun openUsageAccess(context: Context) {
         val direct = Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS, Uri.parse("package:${context.packageName}"))
         if (!tryStart(context, direct)) tryStart(context, Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS))
     }
 
-    /** 打开系统“默认主屏幕”选择页 —— 用于切换回 One UI Home。 */
+    /** Opens the system default-home picker, used to switch back to One UI Home. */
     fun openHomeSettings(context: Context) {
         if (!tryStart(context, Intent(Settings.ACTION_HOME_SETTINGS))) {
             tryStart(context, Intent(Settings.ACTION_MANAGE_DEFAULT_APPS_SETTINGS))
         }
     }
 
-    /** RoleManager 请求 ROLE_HOME 的 Intent；设备不支持时返回 null。 */
+    /** RoleManager intent requesting ROLE_HOME; null when the device does not support it. */
     fun homeRoleRequest(context: Context): Intent? {
         val rm = context.getSystemService(RoleManager::class.java)
         return if (rm.isRoleAvailable(RoleManager.ROLE_HOME)) rm.createRequestRoleIntent(RoleManager.ROLE_HOME) else null

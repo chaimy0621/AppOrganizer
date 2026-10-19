@@ -10,7 +10,7 @@ import androidx.core.graphics.drawable.toBitmap
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-/** 图标内存缓存（含 One UI 图标主题与工作资料角标）。 */
+/** In-memory icon cache (respects One UI icon themes and work-profile badges). */
 class IconLoader(context: Context) {
     private val launcherApps = context.getSystemService(LauncherApps::class.java)
     private val density = context.resources.displayMetrics.densityDpi

@@ -7,7 +7,7 @@ plugins {
     alias(libs.plugins.ksp)
 }
 
-// 签名信息放在项目根目录 keystore.properties（不要提交到 Git），见 README。
+// Signing config lives in keystore.properties at the project root (never commit it). See README.
 val keystoreProps = Properties().apply {
     val f = rootProject.file("keystore.properties")
     if (f.exists()) f.inputStream().use { load(it) }
@@ -20,14 +20,14 @@ android {
 
     defaultConfig {
         applicationId = "com.apporganizer.launcher"
-        minSdk = 29          // RoleManager(ROLE_HOME) 需要 Android 10+
+        minSdk = 29          // RoleManager (ROLE_HOME) needs Android 10+
         targetSdk = 35
         versionCode = 1
         versionName = "0.1.0-mvp"
     }
 
     signingConfigs {
-        // 固定的测试签名：让云端每次组装的 APK 都能直接覆盖安装（不是正式发布用的密钥）
+        // Fixed debug signature so every cloud-built APK installs over the previous one (not a release key)
         getByName("debug") {
             storeFile = file("debug.keystore")
             storePassword = "android"

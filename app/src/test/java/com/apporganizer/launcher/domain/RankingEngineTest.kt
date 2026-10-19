@@ -20,7 +20,7 @@ class RankingEngineTest {
     }
 
     @Test fun `recent usage beats old heavy usage`() {
-        // 旧应用：25 天前用了 30 次；新习惯：最近 2 天用了 6 次
+        // Old app: 30 launches 25 days ago; new habit: 6 launches in the last 2 days
         val old = RankingEngine.statsFrom(List(30) { now - 25 * DAY }, now)
         val recent = RankingEngine.statsFrom(List(6) { now - DAY - it * 1000L }, now)
         assertTrue(RankingEngine.score(recent, now) > RankingEngine.score(old, now))
