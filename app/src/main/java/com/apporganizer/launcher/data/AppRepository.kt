@@ -26,7 +26,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 
-/** 唯一的数据入口：首页常用区、文件夹、Dock 都从这里读取同一份数据。 */
+/** Single source of truth: every screen and the widget read the same app data from here. */
 class AppRepository(
     private val context: Context,
     private val db: AppDatabase,
@@ -49,7 +49,7 @@ class AppRepository(
 
     fun hasUsageAccess(): Boolean = usage.hasAccess()
 
-    // ---------- 应用安装 / 卸载监听 ----------
+    // ---------- Install / uninstall watching ----------
 
     private val packageCallback = object : LauncherApps.Callback() {
         override fun onPackageAdded(packageName: String, user: UserHandle) = resync(packageName)
@@ -71,11 +71,11 @@ class AppRepository(
         launcherApps.registerCallback(packageCallback, Handler(Looper.getMainLooper()))
     }
 
-    // ---------- 扫描与分类 ----------
+    // ---------- Scanning and classification ----------
 
     /**
-     * 同步可启动应用列表。新应用自动分类；已存在的应用保留用户设置。
-     * @param reclassify true = 重新计算所有应用的 autoCategory（用户手动分类仍然保留）。
+     * Syncs the list of launchable apps. New apps are classified automatically; existing apps keep user settings.
+     * @param reclassify true = recompute autoCategory for every app (manual user choices are kept).
      */
     suspend fun syncInstalledApps(reclassify: Boolean = false) = syncMutex.withLock {
         withContext(Dispatchers.IO) {
@@ -130,9 +130,9 @@ class AppRepository(
             .forEachIndexed { i, app -> appDao.setDockSlot(app.appKey, i) }
     }
 
-    // ---------- 使用记录 ----------
+    // ---------- Usage history ----------
 
-    /** 把系统 UsageStats 事件增量写入本地数据库（没有 Usage Access 时什么都不做）。 */
+    /** Incrementally copies system UsageStats events into the local database (no-op without Usage Access). */
     suspend fun ingestUsage() = withContext(Dispatchers.IO) {
         if (!usage.hasAccess()) return@withContext
         val now = System.currentTimeMillis()
@@ -147,7 +147,7 @@ class AppRepository(
         settings.setLastIngestAt(now)
     }
 
-    /** 本 Launcher 内部点击记录：无 Usage Access 时作为降级学习数据。 */
+    /** In-app tap history: fallback learning data when Usage Access is not granted. */
     fun recordLaunch(packageName: String) {
         scope.launch(Dispatchers.IO) {
             eventDao.insert(
@@ -202,9 +202,9 @@ class AppRepository(
         return ok
     }
 
-    // ---------- 每日排序 ----------
+    // ---------- Daily ranking ----------
 
-    /** 重新计算所有应用分数并保存快照。由 DailyRankingWorker 每天调用一次。 */
+    /** Recomputes every app's score and saves a snapshot (originally called once a day by DailyRankingWorker). */
     suspend fun recomputeScores() = withContext(Dispatchers.IO) {
         val now = System.currentTimeMillis()
         val source = if (usage.hasAccess()) LaunchEventEntity.SOURCE_SYSTEM else LaunchEventEntity.SOURCE_LAUNCHER
@@ -214,7 +214,7 @@ class AppRepository(
         val oldScores = scoreDao.getAll().associateBy { it.appKey }
         val slotCount = settings.current().layoutMode.frequentCount
 
-        // 昨天在常用区的应用获得稳定性加成
+        // Apps in yesterday's favourites get a stability bonus
         val previousTop = RankingEngine.arrange(
             apps.map { it.toItem(oldScores[it.appKey]) }, slotCount
         ).filterNotNull().toSet()
@@ -233,7 +233,7 @@ class AppRepository(
         settings.setLastRankingAt(now)
     }
 
-    // ---------- 用户操作 ----------
+    // ---------- User actions ----------
 
     suspend fun lockAt(appKey: String, slot: Int) = db.withTransaction {
         appDao.clearLockedSlot(slot)
@@ -244,10 +244,10 @@ class AppRepository(
 
     suspend fun setExcluded(appKey: String, excluded: Boolean) = appDao.setExcluded(appKey, excluded)
 
-    /** folderId = null → 恢复跟随自动分类 */
+    /** folderId = null → follow automatic classification again */
     suspend fun moveToFolder(appKey: String, folderId: Long?) = appDao.setUserFolder(appKey, folderId)
 
-    /** @return false = Dock 已满 */
+    /** @return false = the dock is full */
     suspend fun addToDock(appKey: String): Boolean = db.withTransaction {
         val used = appDao.getAll().mapNotNull { it.dockSlot }.toSet()
         val free = (0 until MAX_DOCK).firstOrNull { it !in used } ?: return@withTransaction false
@@ -262,7 +262,7 @@ class AppRepository(
 
     suspend fun renameFolder(id: Long, name: String) = folderDao.rename(id, name.trim())
 
-    /** 删除文件夹：其中的应用回到自动分类。“其他”文件夹不可删除（兜底）。 */
+    /** Deletes a folder; its apps return to automatic classification. The "Other" folder cannot be deleted (catch-all). */
     suspend fun deleteFolder(id: Long) = db.withTransaction {
         val f = folderDao.get(id) ?: return@withTransaction
         if (f.category == Category.OTHER.name) return@withTransaction
@@ -270,7 +270,7 @@ class AppRepository(
         if (f.category != null) folderDao.markDeleted(id) else folderDao.delete(id)
     }
 
-    /** 恢复默认分类：清除所有手动分类和自建文件夹，恢复智能文件夹并重新分类。 */
+    /** Resets classification: clears manual choices and custom folders, restores smart folders and reclassifies. */
     suspend fun resetClassification() {
         db.withTransaction {
             appDao.clearAllUserFolders()

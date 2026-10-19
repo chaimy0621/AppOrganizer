@@ -31,7 +31,7 @@ class ClassifierTest {
     }
 
     @Test fun `short keywords need whole token`() {
-        // "tv" 不应误匹配 "...activity..."
+        // "tv" must not match inside "...activity..."
         assertEquals(Category.OTHER, c("org.activitylab.app", "Activity Lab"))
         assertEquals(Category.MEDIA, c("org.example.tv", "Example TV"))
     }

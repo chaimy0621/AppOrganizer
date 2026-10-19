@@ -1,14 +1,14 @@
 package com.apporganizer.launcher.domain
 
 /**
- * 本地、离线的自动分类器（不使用 LLM、不联网）。
+ * Local, offline auto-classifier (no LLM, no network).
  *
- * 优先级（高 → 低）：
- *  0. 用户手动分类（不在此处处理：AppEntity.userFolderId 非空时完全跳过自动分类）
- *  1. 精确包名映射表
- *  2. 包名前缀映射表
- *  3. 游戏标记 / Android ApplicationInfo.category
- *  4. 包名 + 应用名关键词规则（中英文）
+ * Priority (high → low):
+ *  0. Manual user choice (handled elsewhere: auto-classification is skipped when AppEntity.userFolderId is set)
+ *  1. Exact package-name map
+ *  2. Package-prefix map
+ *  3. Game flag / Android ApplicationInfo.category
+ *  4. Keyword rules on package name + app label (English and Chinese keywords)
  *  5. OTHER
  */
 object Classifier {
@@ -16,13 +16,13 @@ object Classifier {
     data class Input(
         val packageName: String,
         val label: String,
-        /** ApplicationInfo.category，未声明为 -1 */
+        /** ApplicationInfo.category; -1 when not declared */
         val systemCategory: Int,
         val isGame: Boolean,
     )
 
-    // 与 android.content.pm.ApplicationInfo.CATEGORY_* 数值一致；
-    // 在此重新声明以保持 domain 层不依赖 Android SDK，便于 JVM 单元测试。
+    // Same values as android.content.pm.ApplicationInfo.CATEGORY_*;
+    // redeclared here so the domain layer has no Android SDK dependency and runs in JVM unit tests.
     private const val CAT_GAME = 0
     private const val CAT_AUDIO = 1
     private const val CAT_VIDEO = 2
@@ -59,8 +59,8 @@ object Classifier {
         for ((category, words) in KEYWORD_RULES) {
             for (w in words) {
                 val matched = when {
-                    w.any { it.code > 127 } -> haystack.contains(w) // 中文：子串匹配
-                    w.length <= 3 -> w in tokens                     // 短词：整词匹配，避免误判
+                    w.any { it.code > 127 } -> haystack.contains(w) // Chinese keyword: substring match
+                    w.length <= 3 -> w in tokens                     // Short word: whole-word match to avoid false hits
                     else -> haystack.contains(w)
                 }
                 if (matched) return category
@@ -69,9 +69,9 @@ object Classifier {
         return null
     }
 
-    /** 常见应用精确映射（含马来西亚常用 App）。可随版本扩充。 */
+    /** Exact map of common apps (including popular Malaysian apps). Extend over time. */
     private val PACKAGE_MAP: Map<String, Category> = mapOf(
-        // 通讯
+        // Communication
         "com.whatsapp" to Category.COMMUNICATION,
         "com.whatsapp.w4b" to Category.COMMUNICATION,
         "org.telegram.messenger" to Category.COMMUNICATION,
@@ -88,7 +88,7 @@ object Classifier {
         "com.google.android.dialer" to Category.COMMUNICATION,
         "com.samsung.android.app.contacts" to Category.COMMUNICATION,
         "com.twitter.android" to Category.COMMUNICATION,
-        // 工作
+        // Work
         "com.google.android.gm" to Category.WORK,
         "com.microsoft.office.outlook" to Category.WORK,
         "com.microsoft.teams" to Category.WORK,
@@ -102,7 +102,7 @@ object Classifier {
         "com.azure.authenticator" to Category.WORK,
         "com.google.android.apps.authenticator2" to Category.WORK,
         "com.microsoft.skydrive" to Category.WORK,
-        // 影音
+        // Media
         "com.google.android.youtube" to Category.MEDIA,
         "com.spotify.music" to Category.MEDIA,
         "com.netflix.mediaclient" to Category.MEDIA,
@@ -112,13 +112,13 @@ object Classifier {
         "com.sec.android.gallery3d" to Category.MEDIA,
         "com.sec.android.app.camera" to Category.MEDIA,
         "com.google.android.apps.youtube.music" to Category.MEDIA,
-        // 购物
+        // Shopping
         "com.shopee.my" to Category.SHOPPING,
         "com.lazada.android" to Category.SHOPPING,
         "com.amazon.mshop.android.shopping" to Category.SHOPPING,
         "com.einnovation.temu" to Category.SHOPPING,
         "com.zzkko" to Category.SHOPPING,
-        // 出行
+        // Travel
         "com.grabtaxi.passenger" to Category.TRAVEL,
         "com.google.android.apps.maps" to Category.TRAVEL,
         "com.waze" to Category.TRAVEL,
@@ -126,11 +126,11 @@ object Classifier {
         "com.agoda.mobile.consumer" to Category.TRAVEL,
         "com.booking" to Category.TRAVEL,
         "com.airasia.mobile" to Category.TRAVEL,
-        // 金融
+        // Finance
         "my.com.tngdigital.ewallet" to Category.FINANCE,
         "com.paypal.android.p2pmobile" to Category.FINANCE,
         "com.samsung.android.spay" to Category.FINANCE,
-        // 工具
+        // Tools
         "com.android.chrome" to Category.TOOLS,
         "com.sec.android.app.sbrowser" to Category.TOOLS,
         "com.android.vending" to Category.TOOLS,
@@ -156,7 +156,7 @@ object Classifier {
         "com.mihoyo" to Category.GAMES,
     )
 
-    /** 关键词规则按顺序匹配，先命中先返回（金融放在购物前，避免 "pay" 类误判）。 */
+    /** Keyword rules are checked in order and the first hit wins (finance before shopping so "pay" is not misread). */
     private val KEYWORD_RULES: List<Pair<Category, List<String>>> = listOf(
         Category.FINANCE to listOf(
             "bank", "banking", "pay", "paypal", "wallet", "ewallet", "finance", "invest", "trading",

@@ -8,7 +8,7 @@
 /captures/
 .externalNativeBuild/
 .cxx/
-# 签名材料绝不能提交
+# Never commit signing material
 keystore.properties
 *.jks
 *.keystore

@@ -3,14 +3,14 @@ package com.apporganizer.launcher.domain
 import kotlin.math.pow
 
 /**
- * 常用应用排序引擎（纯函数，无 Android 依赖）。
+ * Favourite-apps ranking engine (pure functions, no Android dependencies).
  *
- * score = 24h 启动次数 × 5 + 7 天启动次数 × 2 + 30 天启动次数 × 0.5 + 最近使用加分
- * 最近使用加分 = 6 × 0.5^(距上次使用小时数 / 24)，即每 24 小时减半。
- * 稳定性：前一天已在常用区的应用，新分数 × 1.10，减少边界应用每天来回跳动。
+ * score = launches(24h) × 5 + launches(7d) × 2 + launches(30d) × 0.5 + recency bonus
+ * recency bonus = 6 × 0.5^(hours since last use / 24), i.e. it halves every 24 hours.
+ * Stability: apps already in yesterday's favourites get score × 1.10, so borderline apps don't flip daily.
  *
- * 分数每天只计算一次（DailyRankingWorker）。首页显示时只用“已存储的分数”
- * + 当前的锁定/排除/Dock 状态做排列，因此未锁定图标一天之内不会移动。
+ * Scores are computed once a day. Display uses only the stored scores
+ * plus the current lock/exclude/dock state, so unlocked icons don't move during the day.
  */
 object RankingEngine {
     const val W_24H = 5.0
@@ -63,8 +63,8 @@ object RankingEngine {
     }
 
     /**
-     * 排列常用区。锁定应用固定在 lockedSlot；其余空位按分数填充。
-     * 被排除、已在 Dock、分数为 0 的应用不自动进入常用区（锁定优先于这些条件）。
+     * Arranges the favourites row. Locked apps stay in lockedSlot; free slots are filled by score.
+     * Excluded, docked and zero-score apps are not auto-placed (a lock overrides these rules).
      */
     fun arrange(items: List<Item>, slotCount: Int): List<String?> {
         val slots = arrayOfNulls<String>(slotCount)

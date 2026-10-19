@@ -9,8 +9,8 @@ import android.content.pm.PackageManager
 import android.os.Process
 
 /**
- * 只读取“哪个应用在什么时间被切到前台”。
- * 不读取通知、聊天内容、密码、文件或屏幕内容 —— UsageStats API 本身也不提供这些。
+ * Reads only which app came to the foreground and when.
+ * Never reads notifications, messages, passwords, files or screen content; the UsageStats API does not expose them.
  */
 class UsageStatsSource(private val context: Context) {
     private val usm = context.getSystemService(UsageStatsManager::class.java)
@@ -37,9 +37,9 @@ class UsageStatsSource(private val context: Context) {
     }
 
     /**
-     * 返回 (packageName, 时间戳) 列表。一次“启动”= 前台应用从别的包切换到该包；
-     * 同一应用内部切换 Activity 不重复计数；锁屏后重新回到同一应用算一次新启动。
-     * 系统通常只保留最近数天的事件，所以由每日任务持续写入本地数据库。
+     * Returns (packageName, timestamp) pairs. One "launch" = the foreground switches to this package from another;
+     * switching activities inside one app is not counted again; returning to the same app after a screen lock counts as new.
+     * The system keeps only a few days of events, so they are copied into the local database regularly.
      */
     fun readLaunches(from: Long, to: Long): List<Pair<String, Long>> {
         if (!hasAccess()) return emptyList()

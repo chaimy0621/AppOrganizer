@@ -22,7 +22,7 @@ data class InstalledApp(
     val isGame: Boolean,
 )
 
-/** 通过 LauncherApps 读取当前用户的可启动应用（MVP 暂不处理工作资料 / 安全文件夹）。 */
+/** Reads the current user's launchable apps via LauncherApps (work profile / Secure Folder not handled yet). */
 class InstalledAppsSource(private val context: Context) {
     private val launcherApps = context.getSystemService(LauncherApps::class.java)
     private val pm = context.packageManager
@@ -62,12 +62,12 @@ class InstalledAppsSource(private val context: Context) {
         false
     }
 
-    /** 默认 Dock：电话、WhatsApp、相机、浏览器（解析当前设备上的默认处理应用）。 */
+    /** Default dock: phone, WhatsApp, camera, browser (resolved to this device's default handlers). */
     fun defaultDockPackages(): List<String> {
         fun resolve(intent: Intent): String? =
             pm.resolveActivity(intent, PackageManager.MATCH_DEFAULT_ONLY)
                 ?.activityInfo?.packageName
-                ?.takeIf { it != "android" } // "android" = 系统选择器，表示没有默认应用
+                ?.takeIf { it != "android" } // "android" = the system chooser, meaning no default app is set
 
         return listOfNotNull(
             resolve(Intent(Intent.ACTION_DIAL)),

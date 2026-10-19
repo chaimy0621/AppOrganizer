@@ -33,11 +33,11 @@ jobs:
       - name: Rename APK
         run: cp app/build/outputs/apk/debug/app-debug.apk SmartLauncher.apk
 
-      # 发布到 Releases 页面，手机浏览器可直接下载安装
+      # Publish to the Releases page so the APK can be downloaded straight from a phone browser
       - uses: softprops/action-gh-release@v2
         with:
           tag_name: build-${{ github.run_number }}
-          name: 智能桌面 第 ${{ github.run_number }} 版
-          body: 用手机下载下面的 SmartLauncher.apk，点开即可安装。
+          name: Smart Launcher build ${{ github.run_number }}
+          body: Download SmartLauncher.apk below on your phone and tap it to install.
           files: SmartLauncher.apk
           make_latest: true
